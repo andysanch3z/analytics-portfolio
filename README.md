@@ -1,4 +1,4 @@
-# Analytics Portfolio – Andy Evirley
+# Analytics Portfolio 
 
 Business Intelligence Analyst with experience in:
 - SQL development and data modeling  
