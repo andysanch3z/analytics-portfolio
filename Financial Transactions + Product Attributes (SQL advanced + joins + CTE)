@@ -1,0 +1,52 @@
+
+--Internal Account Entry 
+WITH FGLEDG_CTE AS (
+    SELECT 
+        EGCONO,
+        EGDIVI,
+        EGYEA4,
+        EGVONO,
+        EGVSER,
+        EGARAT,
+        ROW_NUMBER() OVER (PARTITION BY EGCONO, EGDIVI, EGYEA4, EGVONO, EGVSER ORDER BY (SELECT NULL)) AS rn
+    FROM MVXJDTA.FGLEDG
+    WHERE EGDIVI IN ('5A0', '5C0', '5D0')
+)
+SELECT 
+    EZFACI AS "Facility",
+    EZANBR AS "Accounting number",
+    EZITNO AS "Item number",
+    CONVERT(date, STUFF(STUFF(CONVERT(VARCHAR(8), EZACDT, 112), 5, 0, '-'), 8, 0, '-')) AS "Accounting date",
+    EZACTY AS "Accounting type",
+    EZVONO AS "Voucher number",
+    EZAIT1 AS "Accounting dimension 1",
+    EZAIT2 AS "Accounting dimension 2",
+    EZAIT3 AS "Accounting dimension 3",
+    EZAIT4 AS "Accounting dimension 4",
+    EZAIT5 AS "Accounting dimension 5",
+    EZACAM AS "Recorded amount",
+    EZACQT AS "Quantity",
+    FGLEDG_CTE.EGARAT AS "Exchange rate"
+FROM MVXJDTA.CINACC 
+LEFT JOIN FGLEDG_CTE ON 
+    EZCONO = FGLEDG_CTE.EGCONO AND
+    EZDIVI = FGLEDG_CTE.EGDIVI AND
+    EZYEA4 = FGLEDG_CTE.EGYEA4 AND
+    EZVONO = FGLEDG_CTE.EGVONO AND
+    EZVSER = FGLEDG_CTE.EGVSER AND
+    FGLEDG_CTE.rn = 1
+WHERE 
+    EZDIVI IN ('5A0', '5C0', '5D0') AND -- Countries
+    EZITNO IN (
+        SELECT MMITNO
+        FROM MVXJDTA.MITMAS 
+        WHERE MMGRP4 IN --Business related product types
+            (   
+                '100500992228100',
+                '100500992228200',
+                '100500992228300',
+                '100500992231300',
+                '100500992231400',
+                '100500992234600'
+            )
+    )
