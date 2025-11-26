@@ -1,0 +1,22 @@
+SELECT
+    f.WarehouseCode        AS Warehouse,
+    f.ItemNumber           AS Item_Number,
+    f.ForecastPeriod       AS Forecast_Period,
+    f.ForecastQuantity     AS Forecast_Quantity,
+    f.CreatedBy            AS Submitted_By
+FROM ForecastEntries f
+WHERE f.CompanyCode = '100'
+  AND f.WarehouseCode IN (
+        SELECT w.WarehouseCode
+        FROM Warehouses w
+        WHERE w.CompanyCode = '100'
+          AND w.DivisionCode IN ('A01', 'B01', 'C01', 'D01')
+      )
+-- Optional filters:
+-- AND f.ForecastPeriod = '202403'
+-- AND f.ItemNumber     = 'SKU12345'
+-- AND f.CreatedBy      = 'JSMITH'
+ORDER BY
+    f.WarehouseCode,
+    f.ItemNumber,
+    f.ForecastPeriod;
